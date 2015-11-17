@@ -1,5 +1,7 @@
 package com.asinenko.carcalendar.items;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -12,8 +14,8 @@ public class TimerItem extends RealmObject {
     private int id;
     private String name;
     private int interval;
-    private String timerDate;
-    private String addedDate;
+    private Date timerDate;
+    private Date addedDate;
 
     public int getId() {
         return id;
@@ -39,19 +41,19 @@ public class TimerItem extends RealmObject {
         this.interval = interval;
     }
 
-    public String getTimerDate() {
+    public Date getTimerDate() {
         return timerDate;
     }
 
-    public void setTimerDate(String timerDate) {
+    public void setTimerDate(Date timerDate) {
         this.timerDate = timerDate;
     }
 
-    public String getAddedDate() {
+    public Date getAddedDate() {
         return addedDate;
     }
 
-    public void setAddedDate(String addedDate) {
+    public void setAddedDate(Date addedDate) {
         this.addedDate = addedDate;
     }
 }

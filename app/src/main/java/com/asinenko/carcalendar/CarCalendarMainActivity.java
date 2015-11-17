@@ -8,13 +8,39 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.asinenko.carcalendar.items.CarItem;
+
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 
 public class CarCalendarMainActivity extends AppCompatActivity {
+
+    private Realm realm;
+    private RealmResults<CarItem> allCarListResult;
+
+    private RealmChangeListener realmCarListener = new RealmChangeListener() {
+        @Override
+        public void onChange() {
+
+            // redraw list view
+            //invaldateView();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
+        Realm.setDefaultConfiguration(realmConfiguration);
+        realm = Realm.getDefaultInstance();
+        realm.addChangeListener(realmCarListener);
+        allCarListResult = realm.where(CarItem.class).findAll();
+
+
         setContentView(R.layout.activity_car_calendar_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -27,6 +53,12 @@ public class CarCalendarMainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
 
     @Override

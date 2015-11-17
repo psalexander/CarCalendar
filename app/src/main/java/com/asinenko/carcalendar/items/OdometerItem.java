@@ -15,7 +15,7 @@ public class OdometerItem extends RealmObject {
     private int id;
     private String carname;
     private String value;
-    private String date;
+    private Date date;
 
     public String getCarname() {
         return carname;
@@ -33,11 +33,11 @@ public class OdometerItem extends RealmObject {
         this.value = value;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
