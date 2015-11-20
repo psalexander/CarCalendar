@@ -6,7 +6,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Car name:"/>
+        android:text="Название:"/>
     <EditText
         android:id="@+id/carNameEdit"
         android:inputType="text"
@@ -16,21 +16,21 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="1dp"
-        android:hint="Car Name" />
+        android:hint="Название" />
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Car number:"/>
+        android:text="Номер:"/>
     <EditText
         android:id="@+id/carNumberEdit"
-        android:inputType="numberDecimal"
+        android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="1dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="1dp"
-        android:hint="Car number" />
+        android:hint="Номер" />
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

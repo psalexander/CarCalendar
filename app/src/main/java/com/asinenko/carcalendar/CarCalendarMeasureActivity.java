@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -13,30 +12,31 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.asinenko.carcalendar.items.CarItem;
+import com.asinenko.carcalendar.items.MeasurementItem;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
-public class CarCalendarMainActivity extends AppCompatActivity {
+public class CarCalendarMeasureActivity extends AppCompatActivity {
 
     private Realm realm;
-    private RealmResults<CarItem> allCarListResult;
+    private RealmResults<MeasurementItem> allMeasuresListResult;
     private Activity activity;
     private ListView listview;
-    private CarArrayAdapter adapter;
+    private MeasuresArrayAdapter adapter;
 
     private RealmChangeListener realmCarListener = new RealmChangeListener() {
         @Override
@@ -50,14 +50,7 @@ public class CarCalendarMainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = this;
-
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
-        Realm.setDefaultConfiguration(realmConfiguration);
-        realm = Realm.getDefaultInstance();
-        realm.addChangeListener(realmCarListener);
-        allCarListResult = realm.where(CarItem.class).findAll();
-
-        setContentView(R.layout.activity_car_calendar_main);
+        setContentView(R.layout.activity_car_calendar_measure);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -65,38 +58,42 @@ public class CarCalendarMainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showAddCarDialog();
+                showAddMeasureDialog();
             }
         });
 
-        adapter = new CarArrayAdapter(this, allCarListResult);
-        listview = (ListView) findViewById(R.id.carListView);
+        realm = Realm.getDefaultInstance();
+        realm.addChangeListener(realmCarListener);
+        allMeasuresListResult = realm.where(MeasurementItem.class).findAll();
+
+        adapter = new MeasuresArrayAdapter(this, allMeasuresListResult);
+        listview = (ListView) findViewById(R.id.measureListView);
         listview.setAdapter(adapter);
         registerForContextMenu(listview);
 
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                editMeasure(position);
             }
         });
     }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        if (v.getId()==R.id.carListView) {
+        if (v.getId()==R.id.measureListView) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
             menu.setHeaderTitle("Действия");
             menu.add(Menu.NONE, 0, 0, "Удалить");
-            menu.add(Menu.NONE, 1, 1, "Редактировать");
+//            menu.add(Menu.NONE, 1, 1, "Редактировать");
         }
     }
 
-    public void deleteCar(int position){
+    public void deleteMeasure(int position){
         final int pos = position;
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-        builder.setTitle("Вы действительно хотите удалить автомобиль?").setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
+        builder.setTitle("Вы действительно хотите удалить измерение?").setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface arg0, int id) {
 
@@ -105,16 +102,16 @@ public class CarCalendarMainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 realm.beginTransaction();
-                CarItem car = allCarListResult.get(pos);
+                MeasurementItem car = allMeasuresListResult.get(pos);
                 car.removeFromRealm();
                 realm.commitTransaction();
             }
         }).show();
     }
 
-    public void editCar(int position){
+    public void editMeasure(int position){
         final int pos = position;
-        showEditCarDialog(pos);
+        showEditMeasureDialog(pos);
     }
 
     @Override
@@ -123,10 +120,10 @@ public class CarCalendarMainActivity extends AppCompatActivity {
         int menuItemIndex = item.getItemId();
         switch (menuItemIndex){
             case 0:
-                deleteCar(info.position);
+                deleteMeasure(info.position);
                 break;
             case 1:
-                editCar(info.position);
+                editMeasure(info.position);
                 break;
             default:
                 break;
@@ -134,55 +131,33 @@ public class CarCalendarMainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        realm.close();
-    }
+    private EditText measureNameEditView;
+    private EditText measureIntervalEditView;
+    private Spinner spinner;
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_car_calendar_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_new) {
-            showAddCarDialog();
-            return true;
-        }else if (id == R.id.action_delete) {
-            return true;
-        }else if (id == R.id.action_prop) {
-            showMeasureActivity();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private EditText carNameEditView;
-    private EditText carNumberEditView;
-    private EditText carVINEditView;
-
-    public void showAddCarDialog(){
+    public void showAddMeasureDialog(){
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         LayoutInflater inflater = activity.getLayoutInflater();
-        View view = inflater.inflate(R.layout.add_car_dialog, null);
+        View view = inflater.inflate(R.layout.add_measure_dialog, null);
 
-        carNameEditView = (EditText) view.findViewById(R.id.carNameEdit);
-        carNumberEditView = (EditText) view.findViewById(R.id.carNumberEdit);
-        carVINEditView = (EditText) view.findViewById(R.id.vinEdit);
+        measureNameEditView = (EditText) view.findViewById(R.id.measureNameEdit);
+        measureIntervalEditView = (EditText) view.findViewById(R.id.measureIntervalEdit);
+        spinner = (Spinner) view.findViewById(R.id.measure_type_spinner);
 
-        final AlertDialog dialog = builder.setTitle("Новое авто").setView(view).
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.measure_type_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        final AlertDialog dialog = builder.setTitle("Добавить измерение").setView(view).
                 setPositiveButton("Добавить", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int id) {
                         realm.beginTransaction();
-                        CarItem car = realm.createObject(CarItem.class); // Create a new object
-                        car.setName(carNameEditView.getText().toString());
-                        car.setNumber(carNumberEditView.getText().toString());
-                        car.setVin(carVINEditView.getText().toString());
+                        MeasurementItem item = realm.createObject(MeasurementItem.class); // Create a new object
+                        item.setName(measureNameEditView.getText().toString());
+                        String[] types = getResources().getStringArray(R.array.measure_type_array);
+                        item.setTimeType( types[((int) spinner.getSelectedItemId())]);
+                        item.setStandartInterval(Integer.valueOf(measureIntervalEditView.getText().toString()));
                         realm.commitTransaction();
                     }
                 }).setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
@@ -195,11 +170,11 @@ public class CarCalendarMainActivity extends AppCompatActivity {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
             }
         });
 
-        carNameEditView.addTextChangedListener(new TextWatcher() {
+        measureNameEditView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -213,7 +188,7 @@ public class CarCalendarMainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 String text = s.toString();
-                RealmResults<CarItem> result = realm.where(CarItem.class).equalTo("name", text).findAll();
+                RealmResults<MeasurementItem> result = realm.where(MeasurementItem.class).equalTo("name", text).findAll();
                 if (result.size() > 0 || text.equalsIgnoreCase("")) {
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
                 } else {
@@ -224,31 +199,41 @@ public class CarCalendarMainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private EditText editCarNameEditView;
-    private EditText editCarNumberEditView;
-    private EditText editCarVINEditView;
+    private EditText editMeasureNameEditView;
+    private EditText editMeasureIntervalEditView;
+    private Spinner editSpinner;
 
-    public void showEditCarDialog(final int carIndex){
+    public void showEditMeasureDialog(final int measureIndex){
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         LayoutInflater inflater = activity.getLayoutInflater();
-        View view = inflater.inflate(R.layout.edit_car_dialog, null);
+        View view = inflater.inflate(R.layout.edit_measure_dialog, null);
 
-        editCarNameEditView = (EditText) view.findViewById(R.id.carNameEdit);
-        editCarNumberEditView = (EditText) view.findViewById(R.id.carNumberEdit);
-        editCarVINEditView = (EditText) view.findViewById(R.id.vinEdit);
-        editCarNameEditView.setText(allCarListResult.get(carIndex).getName());
-        editCarNumberEditView.setText(allCarListResult.get(carIndex).getNumber());
-        editCarVINEditView.setText(allCarListResult.get(carIndex).getVin());
+        editMeasureNameEditView = (EditText) view.findViewById(R.id.measureNameEdit);
+        editMeasureIntervalEditView = (EditText) view.findViewById(R.id.measureIntervalEdit);
+        editSpinner = (Spinner) view.findViewById(R.id.measure_type_spinner);
 
-        final AlertDialog dialog = builder.setTitle("Редактирование").setView(view).
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.measure_type_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        editSpinner.setAdapter(adapter);
+
+        editMeasureNameEditView.setText(allMeasuresListResult.get(measureIndex).getName());
+        editMeasureIntervalEditView.setText(String.valueOf(allMeasuresListResult.get(measureIndex).getStandartInterval()));
+        if(allMeasuresListResult.get(measureIndex).getTimeType().equalsIgnoreCase("Время")){
+            editSpinner.setSelection(0);
+        }else if(allMeasuresListResult.get(measureIndex).getTimeType().equalsIgnoreCase("Дистанция")){
+            editSpinner.setSelection(1);
+        }
+
+        final AlertDialog dialog = builder.setTitle("Редактировать измерение").setView(view).
                 setPositiveButton("Сохранить", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int id) {
                         realm.beginTransaction();
-                        CarItem ci = allCarListResult.get(carIndex);
-                        ci.setName(editCarNameEditView.getText().toString());
-                        ci.setNumber(editCarNumberEditView.getText().toString());
-                        ci.setVin(editCarVINEditView.getText().toString());
+                        MeasurementItem item = allMeasuresListResult.get(measureIndex); // Create a new object
+                        item.setName(editMeasureNameEditView.getText().toString());
+                        String[] types = getResources().getStringArray(R.array.measure_type_array);
+                        item.setTimeType( types[((int) editSpinner.getSelectedItemId())]);
+                        item.setStandartInterval(Integer.valueOf(editMeasureIntervalEditView.getText().toString()));
                         realm.commitTransaction();
                     }
                 }).setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
@@ -261,11 +246,11 @@ public class CarCalendarMainActivity extends AppCompatActivity {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
             }
         });
 
-        editCarNameEditView.addTextChangedListener(new TextWatcher() {
+        editMeasureNameEditView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -279,29 +264,25 @@ public class CarCalendarMainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 String text = s.toString();
-                if (!allCarListResult.get(carIndex).getName().equalsIgnoreCase(text)) {
-                    RealmResults<CarItem> result = realm.where(CarItem.class).equalTo("name", text).findAll();
+                if (!allMeasuresListResult.get(measureIndex).getName().equalsIgnoreCase(text)) {
+                    RealmResults<MeasurementItem> result = realm.where(MeasurementItem.class).equalTo("name", text).findAll();
                     if (result.size() > 0 || text.equalsIgnoreCase("")) {
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
                     } else {
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                     }
                 }
+
             }
         });
         dialog.show();
     }
 
-    public void showMeasureActivity(){
-        Intent intent = new Intent(this, CarCalendarMeasureActivity.class);
-        startActivity(intent);
-    }
-
-    public class CarArrayAdapter extends BaseAdapter {
+    public class MeasuresArrayAdapter extends BaseAdapter {
         private final Context context;
-        private RealmResults<CarItem> valuesResult;
+        private RealmResults<MeasurementItem> valuesResult;
 
-        public CarArrayAdapter(Context context, RealmResults<CarItem> values) {
+        public MeasuresArrayAdapter(Context context, RealmResults<MeasurementItem> values) {
             this.context = context;
             this.valuesResult = values;
         }
@@ -324,12 +305,19 @@ public class CarCalendarMainActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View rowView = inflater.inflate(R.layout.list_car_item, parent, false);
-            TextView nameView = (TextView) rowView.findViewById(R.id.carNameTextView);
-            TextView numberView = (TextView) rowView.findViewById(R.id.carNumberTextView);
-            CarItem car = valuesResult.get(position);
-            nameView.setText(car.getName());
-            numberView.setText(car.getNumber());
+            View rowView = inflater.inflate(R.layout.list_measure_item, parent, false);
+            TextView nameView = (TextView) rowView.findViewById(R.id.measureNameTextView);
+            TextView typeView = (TextView) rowView.findViewById(R.id.measureTypeTextView);
+            TextView intervalView = (TextView) rowView.findViewById(R.id.measureIntervalTextView);
+            MeasurementItem measure = valuesResult.get(position);
+            nameView.setText(measure.getName());
+
+            if (measure.getTimeType() != null && measure.getTimeType().equalsIgnoreCase("Время")){
+                typeView.setText(" дн");
+            }else if (measure.getTimeType() != null && measure.getTimeType().equalsIgnoreCase("Дистанция")){
+                typeView.setText(" км");
+            }
+            intervalView.setText(String.valueOf(measure.getStandartInterval()));
             return rowView;
         }
     }

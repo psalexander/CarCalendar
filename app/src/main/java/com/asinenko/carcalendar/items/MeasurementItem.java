@@ -14,7 +14,7 @@ public class MeasurementItem extends RealmObject {
 
     @PrimaryKey
     private String name;
-    private int timeType;
+    private String timeType;
     private long standartInterval; // time - days, distance - kilometers
 
     public String getName() {
@@ -25,11 +25,11 @@ public class MeasurementItem extends RealmObject {
         this.name = name;
     }
 
-    public int getTimeType() {
+    public String getTimeType() {
         return timeType;
     }
 
-    public void setTimeType(int timeType) {
+    public void setTimeType(String timeType) {
         this.timeType = timeType;
     }
 

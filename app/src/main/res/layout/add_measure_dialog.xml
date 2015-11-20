@@ -2,12 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Название:"/>
+        android:text="Measure name:"/>
     <EditText
-        android:id="@+id/carNameEdit"
+        android:id="@+id/measureNameEdit"
         android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,24 +20,18 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Номер:"/>
-    <EditText
-        android:id="@+id/carNumberEdit"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="1dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="1dp"
-        android:hint="Номер" />
+        android:text="Временное измерение:"/>
+    <android.support.v7.widget.AppCompatSpinner
+        android:id="@+id/measure_type_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="VIN:"/>
+        android:text="Интервал:"/>
     <EditText
-        android:id="@+id/vinEdit"
-        android:inputType="text"
+        android:id="@+id/measureIntervalEdit"
+        android:inputType="numberDecimal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -44,5 +39,5 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="1dp"
         android:fontFamily="sans-serif"
-        android:hint="VIN"/>
+        android:hint="Интервал"/>
 </LinearLayout>
