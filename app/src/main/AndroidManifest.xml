@@ -14,12 +14,17 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".CarCalendarMeasureActivity"
             android:label="@string/title_activity_car_calendar_measure"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".CarActivity"
+            android:label="@string/title_activity_car"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

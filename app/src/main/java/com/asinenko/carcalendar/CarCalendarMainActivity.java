@@ -77,7 +77,11 @@ public class CarCalendarMainActivity extends AppCompatActivity {
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Intent intent = new Intent(activity, CarActivity.class);
+                intent.putExtra("name", allCarListResult.get(position).getName());
+                intent.putExtra("vin", allCarListResult.get(position).getVin());
+                intent.putExtra("number", allCarListResult.get(position).getNumber());
+                startActivity(intent);
             }
         });
     }

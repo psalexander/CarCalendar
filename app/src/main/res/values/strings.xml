@@ -6,7 +6,8 @@
     <string name="title_activity_car_calendar_measure">Список замен</string>
 
     <string-array name="measure_type_array">
-            <item>Время</item>
-            <item>Дистанция</item>
+        <item>Время</item>
+        <item>Дистанция</item>
     </string-array>
+    <string name="title_activity_car">CarActivity</string>
 </resources>
