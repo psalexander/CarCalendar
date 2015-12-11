@@ -59,7 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.3"
-            android:id="@+id/carOdometer"
+            android:id="@+id/carOdometerListView"
             android:background="@android:color/holo_blue_dark">
         </ListView>
     </LinearLayout>
